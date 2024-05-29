@@ -3,6 +3,7 @@ import re
 import os
 import gzip
 from fasta_utils import load_fasta_index_file
+from fasta_utils import get_reverse_compliment
 
 prefix_regex = re.compile("^>")
 
@@ -13,10 +14,11 @@ class FastaFileReader():
     SEQUENCE_BASES = 3
     LINE_WIDTH = 4
 
-    def __init__(self, fasta_file, index_file=None):
+    def __init__(self, fasta_file, index_file=None, reverse_compliment=False):
         self.fasta_file = fasta_file
         self.is_gzipped = self.fasta_file.endswith(".gz")
         self.index_file = index_file if index_file is not None else fasta_file + ".fai"
+        self.reverse_compliment = reverse_compliment
 
     def __enter__(self):
         self.file = open(self.fasta_file) if not self.is_gzipped else gzip.open(self.fasta_file, "rt")
@@ -51,7 +53,10 @@ class FastaFileReader():
             sequence += line.strip()
             line = self.file.readline()
 
-        yield header, sequence
+        if self.reverse_compliment:
+            yield header, get_reverse_compliment(sequence)
+        else:
+            yield header, sequence
 
     def read_indices(self, indices):
         for index in indices:
@@ -66,7 +71,10 @@ class FastaFileReader():
         while line != "":
             if prefix_regex.match(line):
                 if header != "":  # is there an existing header?
-                    yield header, sequence  # if so, yield the prior header and sequence before prepping for new sequence
+                    if self.reverse_compliment:
+                        yield header, get_reverse_compliment(sequence)
+                    else:
+                        yield header, sequence  # if so, yield the prior header and sequence before prepping for new sequence
                 header = line.strip()  # set the header
                 sequence = ""  # reset the sequence
             else:
