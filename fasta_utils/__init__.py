@@ -4,4 +4,4 @@ from fasta_utils.read_fasta_file import read_fasta_file
 from fasta_utils.FastaFileReader import FastaFileReader
 from fasta_utils.FastaSequenceProvider import file_reader_iterator
 from fasta_utils.FastaSequenceProvider import FastaSequenceProvider
-from get_reverse_compliment import get_reverse_compliment
+from fasta_utils.get_reverse_compliment import get_reverse_compliment

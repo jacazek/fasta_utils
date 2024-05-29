@@ -9,7 +9,7 @@ if os.path.isfile(requirement_path):
         install_requires = f.read().splitlines()
 setup(
     name='fasta_utils',
-    version='0.3.0',
+    version='0.3.1',
     packages=find_packages(),
     install_requires=install_requires
 )
