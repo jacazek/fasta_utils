@@ -14,11 +14,10 @@ class FastaFileReader():
     SEQUENCE_BASES = 3
     LINE_WIDTH = 4
 
-    def __init__(self, fasta_file, index_file=None, reverse_compliment=False):
+    def __init__(self, fasta_file, index_file=None):
         self.fasta_file = fasta_file
         self.is_gzipped = self.fasta_file.endswith(".gz")
         self.index_file = index_file if index_file is not None else fasta_file + ".fai"
-        self.reverse_compliment = reverse_compliment
 
     def __enter__(self):
         self.file = open(self.fasta_file) if not self.is_gzipped else gzip.open(self.fasta_file, "rt")
@@ -31,7 +30,7 @@ class FastaFileReader():
     def get_index_table_length(self):
         return len(self.index_table)
 
-    def read_at_index(self, index):
+    def read_at_index(self, index, reverse_compliment=False):
         if self.index_table is None:
             raise Exception("cannot read to index when no fasta index found")
 
@@ -53,17 +52,17 @@ class FastaFileReader():
             sequence += line.strip()
             line = self.file.readline()
 
-        if self.reverse_compliment:
+        if reverse_compliment:
             yield header, get_reverse_compliment(sequence)
         else:
             yield header, sequence
 
-    def read_indices(self, indices):
+    def read_indices(self, indices, reverse_compliment=False):
         for index in indices:
-            for value in self.read_at_index(index):
+            for value in self.read_at_index(index, reverse_compliment=reverse_compliment):
                 yield value
 
-    def read_all(self):
+    def read_all(self, reverse_compliment=False):
         header = ""
         sequence = ""
         self.file.seek(0)
@@ -71,7 +70,7 @@ class FastaFileReader():
         while line != "":
             if prefix_regex.match(line):
                 if header != "":  # is there an existing header?
-                    if self.reverse_compliment:
+                    if reverse_compliment:
                         yield header, get_reverse_compliment(sequence)
                     else:
                         yield header, sequence  # if so, yield the prior header and sequence before prepping for new sequence
