@@ -1,11 +1,5 @@
 import math
-
-
-translation_table = str.maketrans("ATCGN", "TAGCN")
-
-
-def get_compliment(sequence):
-    return sequence[::-1].translate(translation_table)
+from fasta_utils import get_reverse_compliment
 
 
 class KmerTokenizer:
@@ -38,7 +32,7 @@ class KmerTokenizer:
         # return the sequence if kmer_size is larger
         if sequence_length < self.kmer_size:
             if self.include_compliment:
-                return sequence, reversed_sequence
+                return sequence, get_reverse_compliment(sequence)
             else:
                 return sequence
 
@@ -48,7 +42,7 @@ class KmerTokenizer:
             kmer_count = math.ceil(((len(sequence) - self.kmer_size) / self.stride) + 1)
 
         if self.include_compliment:
-            reversed_sequence = get_compliment(sequence)
+            reversed_sequence = get_reverse_compliment(sequence)
             for index in range(kmer_count):
                 start = min(index * self.stride, sequence_length - self.kmer_size)
                 end = start + self.kmer_size
