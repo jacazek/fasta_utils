@@ -48,7 +48,7 @@ class FastaFileReader():
         header = self.file.readline().rstrip()
         line = self.file.readline()
 
-        while not prefix_regex.match(line):
+        while line and not prefix_regex.match(line):
             sequence += line.strip()
             line = self.file.readline()
 
